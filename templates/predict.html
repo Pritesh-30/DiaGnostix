@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}New prediction{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>New diabetes risk prediction</h1>
+    <p class="muted">Fill in all nine measurements. Values come from a routine check-up and lipid panel.</p>
+  </div>
+</div>
+
+<form method="post" class="card form" id="predict-form" novalidate>
+  <label class="field">
+    <span>Patient name <small class="muted">(optional — defaults to you)</small></span>
+    <input type="text" name="patient_name" value="{{ form.patient_name or '' }}" placeholder="{{ session.full_name }}">
+  </label>
+
+  {% set groups = [
+      ('Demographics', ['Age', 'Sex']),
+      ('Body measurements', ['BMI', 'WaistCircumference']),
+      ('Blood pressure', ['SystolicBP', 'DiastolicBP']),
+      ('Cholesterol', ['HDL_Cholesterol', 'Total_Cholesterol']),
+      ('Lifestyle', ['SedentaryMinutes'])
+  ] %}
+
+  {% for title, names in groups %}
+  <fieldset class="group">
+    <legend>{{ title }}</legend>
+    <div class="grid-2">
+      {% for f in features if f.name in names %}
+      <label class="field">
+        <span>{{ f.label }} {% if f.unit %}<small class="unit">{{ f.unit }}</small>{% endif %}</span>
+        {% if f.type == 'select' %}
+          <select name="{{ f.name }}" required>
+            <option value="" disabled {{ 'selected' if not form[f.name] }}>Select…</option>
+            {% for val, text in f.options %}
+            <option value="{{ val }}" {{ 'selected' if form[f.name] == val }}>{{ text }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <input type="number" name="{{ f.name }}" id="{{ f.name }}" required min="{{ f.min }}" max="{{ f.max }}"
+                 step="{{ f.step }}" placeholder="{{ f.placeholder }}" value="{{ form[f.name] or '' }}">
+        {% endif %}
+        <small class="help">{{ f.help }}</small>
+      </label>
+      {% endfor %}
+    </div>
+    {% if title == 'Body measurements' %}
+    <details class="bmi-calc">
+      <summary>Don't know your BMI? Calculate it</summary>
+      <div class="bmi-row">
+        <label class="field"><span>Weight <small class="unit">kg</small></span><input type="number" id="calc-w" step="0.1" min="20" max="300"></label>
+        <label class="field"><span>Height <small class="unit">cm</small></span><input type="number" id="calc-h" step="0.1" min="100" max="250"></label>
+        <button type="button" class="btn btn-ghost" onclick="calcBmi()">Use BMI</button>
+      </div>
+    </details>
+    {% endif %}
+  </fieldset>
+  {% endfor %}
+
+  <div class="form-actions">
+    <button type="reset" class="btn btn-ghost">Clear</button>
+    <button type="submit" class="btn btn-primary" id="submit-btn">Predict risk</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+function calcBmi() {
+  const w = parseFloat(document.getElementById('calc-w').value);
+  const h = parseFloat(document.getElementById('calc-h').value) / 100;
+  if (w > 0 && h > 0) document.getElementById('BMI').value = (w / (h * h)).toFixed(1);
+}
+document.getElementById('predict-form').addEventListener('submit', function (e) {
+  if (!this.checkValidity()) {
+    e.preventDefault();
+    this.classList.add('was-validated');
+    const bad = this.querySelector(':invalid');
+    if (bad) bad.focus();
+    return;
+  }
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Analysing…';
+});
+</script>
+{% endblock %}

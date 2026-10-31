@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>About DiaGnostix</h1>
+    <p class="muted">How the prediction works.</p>
+  </div>
+</div>
+
+<div class="result-grid">
+  <div class="card">
+    <h2>The model</h2>
+    <p>DiaGnostix uses a <b>Support Vector Machine</b> (RBF kernel) trained on the
+      <b>NHANES 2021–2023</b> survey dataset (~6,000 US adults). Each input passes through the same pipeline used in training:</p>
+    <ol class="steps">
+      <li><b>Outlier capping</b> — extreme values are clipped to the 1.5×IQR range of the training data.</li>
+      <li><b>Median imputation</b> — fills any missing values.</li>
+      <li><b>Standard scaling</b> — puts every feature on the same scale.</li>
+      <li><b>SVM classification</b> — outputs a diabetic / non-diabetic class and a probability.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>Input features</h2>
+    <dl class="values">
+      {% for f in features %}
+      <div><dt>{{ f.label }}</dt><dd>{{ f.unit or '—' }}</dd></div>
+      {% endfor %}
+    </dl>
+  </div>
+</div>
+
+<p class="disclaimer">⚠️ This tool is for educational and screening purposes only and is not a substitute for professional medical advice.</p>
+{% endblock %}

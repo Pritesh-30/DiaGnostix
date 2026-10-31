@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# Local app data (user accounts and predictions)
+diagnostix.db
+*.db
+
+# Environment / editor
+.env
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

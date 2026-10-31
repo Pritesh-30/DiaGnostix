@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block body_class %}auth-body{% endblock %}
+{% block main_class %}auth-wrap{% endblock %}
+{% block content %}
+<section class="auth-hero">
+  <div class="auth-hero-inner">
+    <div class="brand brand-lg">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z"/><path d="M9 14h1.5l1-2 1.5 4 1-2H15"/></svg>
+      </span>
+      <span class="brand-name">Dia<b>G</b>nostix</span>
+    </div>
+    <h1>Early diabetes risk screening, powered by machine learning.</h1>
+    <p>Enter nine routine health measurements and get an instant risk estimate from a Support Vector Machine trained on NHANES 2021–2023 data.</p>
+    <ul class="hero-points">
+      <li><span>9</span> clinical &amp; lifestyle features</li>
+      <li><span>SVM</span> RBF-kernel classifier</li>
+      <li><span>6k</span> survey participants in training data</li>
+    </ul>
+  </div>
+</section>
+<section class="auth-panel">
+  <div class="auth-card">
+    {% block auth_form %}{% endblock %}
+  </div>
+</section>
+{% endblock %}

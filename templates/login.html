@@ -1,0 +1,30 @@
+{% extends "auth_layout.html" %}
+{% block title %}Log in{% endblock %}
+{% block auth_form %}
+<h2>Welcome back</h2>
+<p class="muted">Log in to your DiaGnostix account.</p>
+<form method="post" class="form" novalidate>
+  <label class="field">
+    <span>Username or email</span>
+    <input type="text" name="username" required autofocus autocomplete="username" value="{{ request.form.username or '' }}">
+  </label>
+  <label class="field">
+    <span>Password</span>
+    <div class="pw-wrap">
+      <input type="password" name="password" id="password" required autocomplete="current-password">
+      <button type="button" class="pw-toggle" onclick="togglePw('password', this)">Show</button>
+    </div>
+  </label>
+  <button type="submit" class="btn btn-primary btn-block">Log in</button>
+</form>
+<p class="auth-switch">New to DiaGnostix? <a href="{{ url_for('register') }}">Create an account</a></p>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? 'Show' : 'Hide';
+}
+</script>
+{% endblock %}

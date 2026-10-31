@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}DiaGnostix{% endblock %} · DiaGnostix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% if session.user_id %}
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z"/><path d="M9 14h1.5l1-2 1.5 4 1-2H15"/></svg>
+      </span>
+      <span class="brand-name">Dia<b>G</b>nostix</span>
+    </a>
+    <nav class="nav">
+      {% set ep = request.endpoint %}
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if ep == 'dashboard' }}">Dashboard</a>
+      <a href="{{ url_for('predict') }}" class="{{ 'active' if ep in ['predict', 'result'] }}">New Prediction</a>
+      <a href="{{ url_for('history') }}" class="{{ 'active' if ep == 'history' }}">History</a>
+      <a href="{{ url_for('about') }}" class="{{ 'active' if ep == 'about' }}">About</a>
+    </nav>
+    <div class="user-menu">
+      <span class="avatar">{{ session.full_name[:1] | upper }}</span>
+      <span class="user-name">{{ session.full_name }}</span>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="{% block main_class %}container{% endblock %}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes">
+        {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}<button type="button" class="flash-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if session.user_id %}
+  <footer class="footer">
+    DiaGnostix is a screening aid based on NHANES 2021–2023 data and does not replace a medical diagnosis.
+  </footer>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

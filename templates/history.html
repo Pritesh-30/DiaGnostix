@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Prediction history</h1>
+    <p class="muted">{{ rows | length }} assessment{{ '' if rows | length == 1 else 's' }} saved to your account.</p>
+  </div>
+  <a href="{{ url_for('predict') }}" class="btn btn-primary">+ New prediction</a>
+</div>
+
+<div class="card">
+  {% if rows %}
+  <input type="search" class="search" placeholder="Search by name…" oninput="filterRows(this.value)">
+  <div class="table-wrap">
+    <table class="table" id="history-table">
+      <thead>
+        <tr><th>Date</th><th>Name</th><th>Age</th><th>Sex</th><th>BMI</th><th>BP</th><th>HDL / Total</th><th>Risk</th><th>Result</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for r in rows %}
+        {% set lvl = risk_level(r.probability) %}
+        <tr data-name="{{ r.patient_name | lower }}">
+          <td>{{ r.created_at.replace('T', ' ')[:16] }}</td>
+          <td>{{ r.patient_name }}</td>
+          <td>{{ r.age | int }}</td>
+          <td>{{ 'M' if r.sex == 1 else 'F' }}</td>
+          <td>{{ '%.1f' % r.bmi }}</td>
+          <td>{{ r.systolic | int }}/{{ r.diastolic | int }}</td>
+          <td>{{ r.hdl | int }} / {{ r.total_chol | int }}</td>
+          <td><span class="text-{{ lvl[1] }}">{{ '%.1f' % (r.probability * 100) }}%</span></td>
+          <td>{% if r.prediction %}<span class="badge badge-high">Diabetic</span>{% else %}<span class="badge badge-low">Non-diabetic</span>{% endif %}</td>
+          <td class="row-actions">
+            <a class="link" href="{{ url_for('result', pred_id=r.id) }}">View</a>
+            <form method="post" action="{{ url_for('delete_prediction', pred_id=r.id) }}" onsubmit="return confirmDelete(this)">
+              <button type="submit" class="link link-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <p>No saved predictions yet.</p>
+    <a href="{{ url_for('predict') }}" class="btn btn-primary">Run a prediction</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function filterRows(q) {
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('#history-table tbody tr').forEach(tr => {
+    tr.hidden = q && !tr.dataset.name.includes(q);
+  });
+}
+function confirmDelete(form) {
+  const btn = form.querySelector('button');
+  if (btn.dataset.armed) return true;
+  btn.dataset.armed = '1';
+  btn.textContent = 'Confirm?';
+  setTimeout(() => { delete btn.dataset.armed; btn.textContent = 'Delete'; }, 3000);
+  return false;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Hello, {{ session.full_name.split()[0] }} 👋</h1>
+    <p class="muted">Here's an overview of your diabetes risk assessments.</p>
+  </div>
+  <a href="{{ url_for('predict') }}" class="btn btn-primary">+ New prediction</a>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <span class="stat-label">Total assessments</span>
+    <span class="stat-value">{{ stats.total }}</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Predicted diabetic</span>
+    <span class="stat-value">{{ stats.positive }}</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Predicted non-diabetic</span>
+    <span class="stat-value">{{ stats.total - stats.positive }}</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Average risk</span>
+    <span class="stat-value">{{ '%.1f' % (stats.avg_prob * 100) if stats.avg_prob is not none else '—' }}{% if stats.avg_prob is not none %}<small>%</small>{% endif %}</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2>Recent assessments</h2>
+    {% if recent %}<a href="{{ url_for('history') }}" class="link">View all →</a>{% endif %}
+  </div>
+  {% if recent %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Name</th><th>Age</th><th>BMI</th><th>Risk</th><th>Result</th><th></th></tr></thead>
+      <tbody>
+      {% for r in recent %}
+        <tr>
+          <td>{{ r.created_at.replace('T', ' ')[:16] }}</td>
+          <td>{{ r.patient_name }}</td>
+          <td>{{ r.age | int }}</td>
+          <td>{{ '%.1f' % r.bmi }}</td>
+          <td>{{ '%.1f' % (r.probability * 100) }}%</td>
+          <td>{% if r.prediction %}<span class="badge badge-high">Diabetic</span>{% else %}<span class="badge badge-low">Non-diabetic</span>{% endif %}</td>
+          <td><a class="link" href="{{ url_for('result', pred_id=r.id) }}">Details</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <p>No assessments yet.</p>
+    <a href="{{ url_for('predict') }}" class="btn btn-primary">Run your first prediction</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

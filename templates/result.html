@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+{% block content %}
+{% set pct = row.probability * 100 %}
+<div class="page-head">
+  <div>
+    <h1>Prediction result</h1>
+    <p class="muted">{{ row.patient_name }} · {{ row.created_at.replace('T', ' ')[:16] }}</p>
+  </div>
+  <div class="head-actions">
+    <button class="btn btn-ghost" onclick="window.print()">Print</button>
+    <a href="{{ url_for('predict') }}" class="btn btn-primary">New prediction</a>
+  </div>
+</div>
+
+<div class="result-grid">
+  <div class="card result-card result-{{ level_cls }}">
+    <div class="gauge" style="--pct: {{ '%.1f' % pct }}">
+      <div class="gauge-inner">
+        <span class="gauge-value">{{ '%.1f' % pct }}<small>%</small></span>
+        <span class="gauge-label">diabetes probability</span>
+      </div>
+    </div>
+    <div class="verdict">
+      {% if row.prediction %}
+        <span class="badge badge-high badge-lg">Likely diabetic</span>
+        <p>The SVM model classifies this profile as <b>diabetic</b>. Please consult a doctor and get an HbA1c or fasting glucose test to confirm.</p>
+      {% else %}
+        <span class="badge badge-low badge-lg">Likely non-diabetic</span>
+        <p>The SVM model classifies this profile as <b>non-diabetic</b>.
+        {% if level_cls != 'low' %} However, the estimated risk is <b>{{ level | lower }}</b>, so a check-up is still worthwhile.{% endif %}</p>
+      {% endif %}
+      <p class="muted small">Risk level: <b class="text-{{ level_cls }}">{{ level }}</b> (Low &lt; 20% · Moderate 20–40% · High ≥ 40%)</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Measurements entered</h2>
+    <dl class="values">
+      {% for f in features %}
+      <div>
+        <dt>{{ f.label }}</dt>
+        <dd>
+          {% if f.name == 'Sex' %}{{ 'Male' if values.Sex == 1 else 'Female' }}
+          {% else %}{{ values[f.name] | round(1) | string | replace('.0', '') }} <small>{{ f.unit }}</small>{% endif %}
+        </dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Health indicators</h2>
+  <p class="muted small">Rule-based notes on each reading using common clinical reference ranges. These are separate from the model's prediction.</p>
+  <ul class="insights">
+    {% for cls, name, text in insights %}
+    <li class="insight insight-{{ cls }}"><span class="dot"></span><b>{{ name }}</b><span>{{ text }}</span></li>
+    {% endfor %}
+  </ul>
+</div>
+
+<p class="disclaimer">⚠️ DiaGnostix is a screening tool, not a diagnosis. Always consult a qualified healthcare professional.</p>
+{% endblock %}
